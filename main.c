@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void init(int n, double delta, double **f, double **u,double **u_out) {
+void init(int n, double delta, double **f, double **u, double **u_out) {
 
 	double x = -1.0;
 	double y = -1.0;
@@ -57,19 +57,19 @@ void jacobi(int n, int k, double **u, double **f, double **u_out) {
 	for(h = 0; h < k; h++){ //running k times
 		one_jacobi_step(n, one_fourth, delta2, u, f, u_out);
 		//copying back to the initializing array
-		for(i = 0; i < n; i++) {
-			for(j = 0; j < n; j++) {
-				u[i][j] = u_out[i][j];
-			}
-		}
+		double **temp = u;
+		u = u_out;
+		u_out = temp;
 	}
 }
 
 int main(int argc, char *argv[]) {
 
 	int N = 20;
-	if(argc == 2) {
+	int iter = 10000;
+	if(argc == 3) {
 		N = atoi(argv[1]);
+		iter = atoi(argv[2]);
 	}
 	N += 2;
 	double delta = 2.0/(N-1.0);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 	
 	print_matrix(N, u);
 	printf("\n");
-	jacobi(N, 10000, u, f, u_out);
+	jacobi(N, iter, u, f, u_out);
 	print_matrix(N, u_out);
 	free(f);
 	free(u);
