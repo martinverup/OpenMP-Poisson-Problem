@@ -73,20 +73,14 @@ double one_gauss_seidel(int n, double one_fourth, double delta2, double **u, dou
 void gauss_seidel(int n, double delta2, int k, double **u, double **f, double threshold)
 {
     double one_fourth = 1.0 / 4.0;
-    double d =  threshold;
-    double average_change = 0;
+    double d = 0.0;
     int h = 0;
     do
     {
-        average_change = one_gauss_seidel(n, one_fourth, delta2, u, f);
+        d = one_gauss_seidel(n, one_fourth, delta2, u, f);
         h += 1;
     }
-    while (average_change > d && h < k);
-    printf("h is: %d\n", h );
-    if (h < k)
-    {
-        printf("Stopped by threshold at iteration %d\n", h);
-    }
+    while (d > threshold && h < k);
 }
 
 int main(int argc, char *argv[])

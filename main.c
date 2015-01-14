@@ -58,6 +58,7 @@ double one_jacobi_step(int n, double one_fourth, double delta2, double **u, doub
         {
             double temp = u_new[i][j];
             u_new[i][j] = (u[i][j - 1] + u[i][j + 1] + u[i - 1][j] + u[i + 1][j] + (delta2 * f[i][j])) * one_fourth;
+            
             temp -= u_new[i][j];
             sum += (temp < 0 ? -temp : temp);
         }
@@ -69,7 +70,7 @@ void jacobi(int n, int k_max, double delta2, double **u, double **f, double **u_
 {
 
     double one_fourth = 1.0 / 4.0, d = 0;
-    int k;
+    int k = 0;
     do   //running k times
     {
         d = one_jacobi_step(n, one_fourth, delta2, u, f, u_out, threshold);
