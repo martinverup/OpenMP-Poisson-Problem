@@ -58,7 +58,7 @@ double one_jacobi_step(int n, double one_fourth, double delta2, double **u, doub
         {
             double temp = u_new[i][j];
             u_new[i][j] = (u[i][j - 1] + u[i][j + 1] + u[i - 1][j] + u[i + 1][j] + (delta2 * f[i][j])) * one_fourth;
-            
+
             temp -= u_new[i][j];
             sum += (temp < 0 ? -temp : temp);
         }
@@ -79,7 +79,45 @@ void jacobi(int n, int k_max, double delta2, double **u, double **f, double **u_
         u = u_out;
         u_out = temp;
         k += 1;
-    } while (k < k_max && d > threshold);
+    }
+    while (k < k_max && d > threshold);
+}
+
+double one_gauss_seidel(int n, double one_fourth, double delta2, double **u, double **f)
+{
+    int i, j;
+    double temp, change_temp;
+    double change_average = 0;
+    for (i = 1; i < n - 1; i++)
+    {
+        for (j = 1; j < n - 1; j++)
+        {
+            temp = u[i][j];
+            u[i][j] = one_fourth * (u[i][j - 1] + u[i][j + 1] + u[i - 1][j] + u[i + 1][j] + delta2 * f[i][j]);
+
+            //calculating the average of the change by first summing up the absolute value of the changes
+            change_temp = u[i][j] - temp;
+            if (change_temp < 0.0)
+            {
+                change_temp = 0 - change_temp;
+            }
+            change_average += change_temp;
+        }
+    }
+    return change_average / ((double) n * (double) n);
+}
+
+void gauss_seidel(int n, double delta2, int k, double **u, double **f, double threshold)
+{
+    double one_fourth = 1.0 / 4.0;
+    double d = 0.0;
+    int h = 0;
+    do
+    {
+        d = one_gauss_seidel(n, one_fourth, delta2, u, f);
+        h += 1;
+    }
+    while (d > threshold && h < k);
 }
 
 int main(int argc, char *argv[])
