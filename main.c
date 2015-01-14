@@ -48,31 +48,37 @@ void print_matrix(int n, double **f)
     }
 }
 
-void one_jacobi_step(int n, double one_fourth, double delta2, double **u, double **f, double **u_new)
+double one_jacobi_step(int n, double one_fourth, double delta2, double **u, double **f, double **u_new, double threshold)
 {
+    double sum = 0;
     int i, j;
     for (i = 1; i < n - 1; i++)
     {
         for (j = 1; j < n - 1; j++)
         {
+            double temp = u_new[i][j];
             u_new[i][j] = (u[i][j - 1] + u[i][j + 1] + u[i - 1][j] + u[i + 1][j] + (delta2 * f[i][j])) * one_fourth;
+            temp -= u_new[i][j];
+            sum += (temp < 0 ? -temp : temp);
         }
     }
+    return sum /= ((double) n) * ((double) n);
 }
 
-void jacobi(int n, int k, double delta2, double **u, double **f, double **u_out)
+void jacobi(int n, int k_max, double delta2, double **u, double **f, double **u_out, double threshold)
 {
-    
-    double one_fourth = 1.0 / 4.0;
-    int h, i, j;
-    for (h = 0; h < k; h++)   //running k times
+
+    double one_fourth = 1.0 / 4.0, d = 0;
+    int k;
+    do   //running k times
     {
-        one_jacobi_step(n, one_fourth, delta2, u, f, u_out);
+        d = one_jacobi_step(n, one_fourth, delta2, u, f, u_out, threshold);
         //copying back to the initializing array
         double **temp = u;
         u = u_out;
         u_out = temp;
-    }
+        k += 1;
+    } while (k < k_max && d > threshold);
 }
 
 int main(int argc, char *argv[])
@@ -80,6 +86,7 @@ int main(int argc, char *argv[])
 
     int N = 20;
     int iter = 10000;
+    double threshold = 0.01;
     if (argc > 1)
     {
         N = atoi(argv[1]);
@@ -87,6 +94,10 @@ int main(int argc, char *argv[])
     if (argc > 2)
     {
         iter = atoi(argv[2]);
+    }
+    if (argc > 3)
+    {
+        threshold = atof(argv[3]);
     }
     double delta = 2.0 / ((double)N - 1.0);
     N += 2;
@@ -103,9 +114,9 @@ int main(int argc, char *argv[])
     }
     init(N, delta, f, u, u_out);
 
-    print_matrix(N, f);
+    //print_matrix(N, f);
     printf("\n");
-    jacobi(N, iter, delta2, u, f, u_out);
+    jacobi(N, iter, delta2, u, f, u_out, threshold);
     print_matrix(N, u_out);
     free(f);
     free(u);
