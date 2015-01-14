@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void init(int n, double delta, double **f, double **u, double **u_out)
 {
@@ -107,7 +108,7 @@ double one_gauss_seidel(int n, double one_fourth, double delta2, double **u, dou
     return change_average / ((double) n * (double) n);
 }
 
-void gauss_seidel(int n, double delta2, int k, double **u, double **f, double threshold)
+void gauss_seidel(int n, int k, double delta2, double **u, double **f, double threshold)
 {
     double one_fourth = 1.0 / 4.0;
     double d = 0.0;
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
 
     int N = 20;
     int iter = 10000;
-    double threshold = 0.01;
+    double threshold = 0.01; 
     if (argc > 1)
     {
         N = atoi(argv[1]);
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
     {
         threshold = atof(argv[3]);
     }
+
     double delta = 2.0 / ((double)N - 1.0);
     N += 2;
     double delta2 = delta * delta;
@@ -152,14 +154,25 @@ int main(int argc, char *argv[])
         u_out[i] = malloc(sizeof(*u_out[i]) * N);
     }
     init(N, delta, f, u, u_out);
-
     //print_matrix(N, f);
-    printf("\n");
-    jacobi(N, iter, delta2, u, f, u_out, threshold);
-    print_matrix(N, u_out);
+    if (argc > 4)
+    {  
+        if(!strcmp(argv[4], "jac")) {
+            jacobi(N, iter, delta2, u, f, u_out, threshold);
+            //print_matrix(N, u_out);
+        }else if(!strcmp(argv[4], "gs")) {
+            gauss_seidel(N, iter, delta2, u, f, threshold);
+            //print_matrix(N, u);
+        }else if(!strcmp(argv[4], "omp")) {
+            jacobi(N, iter, delta2, u, f, u_out, threshold);
+            //print_matrix(N, u_out);
+        }else {
+            printf("Did not give a method as argument, try adding 'jac', 'gs', 'omp'\n");
+        }
+    }
+
     free(f);
     free(u);
     free(u_out);
-
     return 0;
 }
