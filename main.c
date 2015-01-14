@@ -55,14 +55,14 @@ void one_jacobi_step(int n, double one_fourth, double delta2, double **u, double
     {
         for (j = 1; j < n - 1; j++)
         {
-            u_new[i][j] = (u[i][j - 1] + u[i][j + 1] + u[i - 1][j] + u[i + 1][j] + delta2 * f[i][j]) * one_fourth;
+            u_new[i][j] = (u[i][j - 1] + u[i][j + 1] + u[i - 1][j] + u[i + 1][j] + (delta2 * f[i][j])) * one_fourth;
         }
     }
 }
 
-void jacobi(int n, int k, double **u, double **f, double **u_out)
+void jacobi(int n, int k, double delta2, double **u, double **f, double **u_out)
 {
-    double delta2 = (2.0 / (n - 1.0)) * (2.0 / (n - 1.0)); //grid spacing
+    
     double one_fourth = 1.0 / 4.0;
     int h, i, j;
     for (h = 0; h < k; h++)   //running k times
@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
     {
         iter = atoi(argv[2]);
     }
+    double delta = 2.0 / ((double)N - 1.0);
     N += 2;
-    double delta = 2.0 / (N - 1.0);
-
+    double delta2 = delta * delta;
     double (**f) = malloc(sizeof(*f) * N);
     double (**u) = malloc(sizeof(*u) * N);
     double (**u_out) = malloc(sizeof(*u_out) * N);
@@ -103,9 +103,9 @@ int main(int argc, char *argv[])
     }
     init(N, delta, f, u, u_out);
 
-    //print_matrix(N, f);
+    print_matrix(N, f);
     printf("\n");
-    jacobi(N, iter, u, f, u_out);
+    jacobi(N, iter, delta2, u, f, u_out);
     print_matrix(N, u_out);
     free(f);
     free(u);
