@@ -2,7 +2,7 @@ TARGET	= poisson
 OBJS	= poisson.o
 
 OPT		= -g -fast -xrestrict
-PARA	= -xopenmp -xloopinfo -xvpara
+PARA	= -xopenmp -xloopinfo -xvpara -xinstrument=datarace
 
 CCC	= cc
 

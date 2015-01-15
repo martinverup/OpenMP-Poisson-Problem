@@ -91,7 +91,7 @@ void print_matrix(double **M)
         for (j = 0; j < N; j++)
         {
             // Swap indecies to show correct x and y-axes
-            printf("%.2f\t", M[j][i]);
+            printf("%.2f\t", M[i][j]);
         }
         printf("\n");
     }
@@ -178,14 +178,15 @@ void omp_jacobi()
     int k = 0, i, j;
     double **temp; // Create temporary pointer
     double old_val;
+    double d_temp;
 
-    // Run do-while loop
-    do
+    #pragma omp parallel private(d) firstprivate(k)
     {
-        // Run through entire matrix
-        #pragma omp parallel
+        // Run do-while loop
+        do
         {
-            #pragma omp for private(i,j,old_val) reduction(+:d)
+            // Run through entire matrix
+            #pragma omp for private(i,j,old_val) reduction(+:d_temp)
             for (i = 1; i < N - 1; i++)
             {
                 for (j = 1; j < N - 1; j++)
@@ -197,20 +198,24 @@ void omp_jacobi()
                     // Calculate difference between old and new value
                     old_val -= U_old[i][j];
                     // Take absolute value of difference
-                    d += (old_val < 0 ? -old_val : old_val);
+                    d_temp += (old_val < 0 ? -old_val : old_val);
                 }
             }
-        } /* end omp parallel */
-        // Take average of difference between old and new values
-        d /= ((double) N) * ((double) N);
+            // Take average of difference between old and new values
+            d = d_temp / ((double) N) * ((double) N);
 
-        // Swap pointers for U and U_old
-        temp = U;
-        U = U_old;
-        U_old = temp;
+            // Swap pointers for U and U_old
+            #pragma omp single
+            {
+                temp = U;
+                U = U_old;
+                U_old = temp;
+            } // single
         k += 1;
     }
     while (k < k_max && d > threshold);
+} /* end omp parallel */
+
 }
 
 int main(int argc, char *argv[])
