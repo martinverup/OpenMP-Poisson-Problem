@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
 
 // Declare global variables
 double **F; // F matrix
@@ -86,12 +87,12 @@ void deinit()
 void print_matrix(double **M)
 {
     int i, j;
-    for (i = 0; i < N; i++)
+    for (i = N - 1; i > 0; i--)
     {
         for (j = 0; j < N; j++)
         {
             // Swap indecies to show correct x and y-axes
-            printf("%.2f\t", M[i][j]);
+            printf("%.2f\t", M[j][i]);
         }
         printf("\n");
     }
@@ -186,7 +187,7 @@ void omp_jacobi()
         do
         {
             // Run through entire matrix
-            #pragma omp for private(i,j,old_val) reduction(+:d_temp)
+            #pragma omp for private(i,j,old_val) reduction(+:d_temp) schedule(runtime)
             for (i = 1; i < N - 1; i++)
             {
                 for (j = 1; j < N - 1; j++)
@@ -259,7 +260,7 @@ int main(int argc, char *argv[])
     {
         printf("Did not give a method as argument, try adding 'jac', 'gs', 'omp'\n");
     }
-    print_matrix(U);
+    //print_matrix(U);
 
     // Deinitialize to prevent memory leaks
     deinit();
