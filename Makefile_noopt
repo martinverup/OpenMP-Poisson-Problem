@@ -1,8 +1,8 @@
-TARGET	= poisson
+TARGET	= poisson_noopt
 OBJS	= poisson.o
 
-OPT		= -g -fast -xrestrict
-PARA	= -xopenmp
+OPT		= -g
+PARA	= -xopenmp=noopt
 
 CCC	= cc
 

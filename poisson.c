@@ -212,10 +212,10 @@ void omp_jacobi()
                 U = U_old;
                 U_old = temp;
             } // single
-        k += 1;
-    }
-    while (k < k_max && d > threshold);
-} /* end omp parallel */
+            k += 1;
+        }
+        while (k < k_max && d > threshold);
+    } /* end omp parallel */
 
 }
 
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
     // Set default values
     N = 30;           // Grid size
     k_max = 1000;     // Number of iterations
-    threshold = 0.01; // Threshold limit
+    threshold = 0.0001; // Threshold limit
 
     // Set values according to program arguments
     if (argc > 2)
@@ -260,7 +260,14 @@ int main(int argc, char *argv[])
     {
         printf("Did not give a method as argument, try adding 'jac', 'gs', 'omp'\n");
     }
-    //print_matrix(U);
+
+    if (argc > 5)
+    {
+        if (!strcmp(argv[5], "p"))
+        {
+            print_matrix(U);
+        }
+    }
 
     // Deinitialize to prevent memory leaks
     deinit();
